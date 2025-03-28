@@ -23,7 +23,7 @@ Ada tiga jenis pendapatan yang dilaporkan dalam data frame ini: p25th, median, d
 **Jawaban:** Median lebih sering digunakan karena jarang menghasilkan outliers. Jika ada beberapa individu dengan pendapatan yang sangat tinggi atau sangat rendah, mean dapat terdistorsi, sedangkan median memberikan gambaran yang lebih akurat tentang pendapatan tipikal kelompok tersebut.
 
 ## Exercise 2 
-Buat ulang visualisasi berikut. Catatan: Lebar bin yang digunakan adalah $5.000. Perhatikan dengan cermat teks dan label pada sumbu.
+Buat ulang visualisasi berikut. Catatan: Lebar bin yang digunakan adalah $5.000 Perhatikan dengan cermat teks dan label pada sumbu.
 
 **Jawaban:**
 ```{r}
