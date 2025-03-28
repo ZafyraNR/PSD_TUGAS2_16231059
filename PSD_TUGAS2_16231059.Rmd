@@ -1,0 +1,130 @@
+---
+title: "PSD_TUGAS2_16231059"
+output: html_document
+date: "2025-03-28"
+---
+
+```{r load-packages, message = FALSE, echo = FALSE}
+suppressWarnings({ #supaya tampilan html tidak ada warning mengenai packages)
+  library(tidyverse)
+  library(dplyr)
+  library(scales)
+  library(fivethirtyeight)
+})
+
+data("college_recent_grads")
+
+glimpse(college_recent_grads)
+```
+
+## Exercise 1
+Ada tiga jenis pendapatan yang dilaporkan dalam data frame ini: p25th, median, dan p75th. Ketiganya masing-masing merujuk pada persentil ke-25, ke-50, dan ke-75 dari distribusi pendapatan individu yang diambil sampelnya untuk suatu jurusan tertentu. Mengapa kita sering memilih median daripada mean untuk menggambarkan pendapatan tipikal suatu kelompok?
+
+**Jawaban:** Median lebih sering digunakan karena jarang menghasilkan outliers. Jika ada beberapa individu dengan pendapatan yang sangat tinggi atau sangat rendah, mean dapat terdistorsi, sedangkan median memberikan gambaran yang lebih akurat tentang pendapatan tipikal kelompok tersebut.
+
+## Exercise 2 
+Buat ulang visualisasi berikut. Catatan: Lebar bin yang digunakan adalah $5.000. Perhatikan dengan cermat teks dan label pada sumbu.
+
+**Jawaban:**
+```{r}
+# filter data untuk hanya STEM majors
+stem_majors <- college_recent_grads %>%
+  filter(major_category %in% c("Biology & Life Science", "Computers & Mathematics", "Engineering", "Physical Sciences"))
+
+# plot histogram
+stem_majors %>%
+  ggplot(aes(x = median, fill = major_category)) +
+  geom_histogram(binwidth = 5000, color = "black") +
+  facet_wrap(~major_category, scales = "free_y") +
+  scale_x_continuous(labels = dollar_format(prefix="$", scale = 0.001, suffix="K")) +
+  labs(title = "Median earnings of full-time, year-round workers",
+       subtitle = "For STEM majors",
+       x = "Median earnings",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Exercise 3
+Buat ulang visualisasi dari latihan sebelumnya, kali ini dengan lebar bin sebesar $1.000. Mana yang lebih baik antara $1.000 atau $5.000 sebagai pilihan lebar bin? Jelaskan alasan Anda dalam satu kalimat.
+
+**Jawaban:**
+```{r}
+# buat histogram dengan bin width $1,000
+ggplot(stem_majors, aes(x = median, fill = major_category)) +
+  geom_histogram(binwidth = 1000, color = "black") +
+  facet_wrap(~ major_category, scales = "free_y") +
+  labs(
+    title = "Median earnings of full-time, year-round workers",
+    subtitle = "For STEM majors",
+    x = "Median earnings",
+    y = "Frequency"
+  ) +
+  scale_x_continuous(labels = scales::dollar_format(prefix="$", scale = 0.001, suffix="K")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+Binwidth $1.000 menampilkan lebih banyak batang (bars) dalam histogram, sehingga grafik menjadi lebih rinci tetapi bisa terlihat terlalu berantakan dan sulit diinterpretasikan. Sementara itu, binwidth $5.000 mengelompokkan data ke dalam rentang yang lebih luas, membuat pola distribusi pendapatan lebih jelas dan lebih mudah dibaca, terutama untuk melihat tren utama tanpa terlalu banyak fluktuasi kecil.
+
+## Exercise 4
+Jurusan STEM mana (yaitu, jurusan dalam kategori "Biology & Life Science", "Computers & Mathematics", "Engineering", dan "Physical Sciences") yang memiliki gaji median yang sama dengan atau lebih rendah dari median untuk seluruh jurusan (semua jurusan, bukan hanya yang termasuk dalam kategori STEM)? Output Anda hanya boleh menampilkan nama jurusan serta pendapatan median, persentil ke-25, dan persentil ke-75 untuk jurusan tersebut, dan harus diurutkan sehingga jurusan dengan pendapatan median tertinggi berada di bagian atas.
+
+**Jawaban:**
+```{r}
+# median pendapatan untuk semua jurusan
+median_all_majors <- median(college_recent_grads$median, na.rm = TRUE)
+
+# memfilter jurusan STEM dengan gaji median ≤ median semua jurusan
+stem_below_median <- college_recent_grads %>%
+  filter(major_category %in% c("Biology & Life Science", "Computers & Mathematics", 
+                               "Engineering", "Physical Sciences"),
+         median <= median_all_majors) %>%
+  select(major, median, p25th, p75th) %>%
+  arrange(desc(median))  # Urutan dari yang tertinggi ke terendah
+
+stem_below_median
+```
+
+## Exercise 4
+Buatlah sebuah pertanyaan yang menarik bagi Anda yang dapat dijawab menggunakan setidaknya tiga variabel dari dataset, lalu jawab pertanyaan tersebut menggunakan statistik ringkasan dan/atau visualisasi.
+
+**Pertanyaan**
+
+Bagaimana hubungan antara persentase pengangguran, pendapatan median, dan proporsi perempuan dalam berbagai jurusan di kategori STEM? Apakah jurusan dengan lebih banyak perempuan cenderung memiliki tingkat pengangguran yang lebih tinggi atau pendapatan yang lebih rendah?
+
+**Jawaban**
+```{r}
+# memfilter menjadi hanya jurusan STEM
+stem_data <- college_recent_grads %>%
+  filter(major_category %in% c("Biology & Life Science", "Computers & Mathematics", "Engineering", "Physical Sciences")) %>%
+  select(major, major_category, unemployment_rate, median, sharewomen)
+
+summary(stem_data[, c("unemployment_rate", "median", "sharewomen")])
+
+# visualisasi hubungan antara persentase perempuan dan pendapatan median
+ggplot(stem_data, aes(x = sharewomen, y = median, color = major_category)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(
+    title = "Hubungan antara Proporsi Perempuan dan Pendapatan Median dalam STEM",
+    x = "Proporsi Perempuan dalam Jurusan",
+    y = "Pendapatan Median",
+    color = "Kategori Jurusan STEM"
+  ) +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_minimal()
+
+# visualisasi hubungan antara proporsi perempuan dan tingkat pengangguran
+ggplot(stem_data, aes(x = sharewomen, y = unemployment_rate, color = major_category)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(
+    title = "Hubungan antara Proporsi Perempuan dan Tingkat Pengangguran dalam STEM",
+    x = "Proporsi Perempuan dalam Jurusan",
+    y = "Tingkat Pengangguran",
+    color = "Kategori Jurusan STEM"
+  ) +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  theme_minimal()
+```
