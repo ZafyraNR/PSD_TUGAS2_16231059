@@ -84,6 +84,18 @@ stem_below_median <- college_recent_grads %>%
   arrange(desc(median))  # Urutan dari yang tertinggi ke terendah
 
 stem_below_median
+
+# Visualisasi jurusan STEM dengan median income ≤ median semua jurusan
+ggplot(stem_below_median, aes(x = reorder(major, median), y = median)) +
+  geom_col(fill = "#2c7fb8") +
+  coord_flip() +
+  labs(
+    title = "STEM Majors dengan Pendapatan Median ≤ Median Semua Jurusan",
+    x = "Nama Jurusan",
+    y = "Pendapatan Median ($)"
+  ) +
+  scale_y_continuous(labels = scales::dollar_format()) +
+  theme_minimal()
 ```
 
 ## Exercise 5
