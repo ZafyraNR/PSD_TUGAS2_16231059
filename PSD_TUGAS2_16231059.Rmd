@@ -86,7 +86,7 @@ stem_below_median <- college_recent_grads %>%
 stem_below_median
 ```
 
-## Exercise 4
+## Exercise 5
 Buatlah sebuah pertanyaan yang menarik bagi Anda yang dapat dijawab menggunakan setidaknya tiga variabel dari dataset, lalu jawab pertanyaan tersebut menggunakan statistik ringkasan dan/atau visualisasi.
 
 **Pertanyaan**
